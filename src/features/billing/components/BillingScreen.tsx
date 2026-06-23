@@ -1,17 +1,35 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { MOCK_INVOICES } from '@/constants/mockData';
-import { FileText, CheckCircle, Clock } from 'lucide-react';
+import { FileText, CheckCircle, Clock, Loader2 } from 'lucide-react';
 
 export default function BillingScreen() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Calculate metric aggregates
   const totalAmount = MOCK_INVOICES.reduce((acc, inv) => acc + inv.amount, 0);
   const paidAmount = MOCK_INVOICES.filter(i => i.status === 'Paid').reduce((acc, inv) => acc + inv.amount, 0);
   const pendingAmount = MOCK_INVOICES.filter(i => i.status !== 'Paid').reduce((acc, inv) => acc + inv.amount, 0);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[75vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="text-sm font-semibold text-slate-500">Loading billing invoices...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 select-none">

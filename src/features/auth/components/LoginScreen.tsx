@@ -66,12 +66,11 @@ export default function LoginScreen() {
         >
           {/* Header */}
           <div className="flex flex-col items-center text-center">
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-slate-900 shadow-md">
+            <div className="relative h-14 w-14 overflow-hidden">
               <Image
                 src="/esimlogo.png"
                 alt="e-SIM Platform Logo"
-                width={36}
-                height={36}
+                fill
                 className="object-contain"
               />
             </div>

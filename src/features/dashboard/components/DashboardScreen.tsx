@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import {
   Cpu,
@@ -9,7 +10,8 @@ import {
   Users,
   HardDrive,
   FileDown,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 import StatsCard from './StatsCard';
 import QuickActions from './QuickActions';
@@ -24,7 +26,13 @@ import { Button } from '@/components/ui/Button';
 
 export default function DashboardScreen() {
   const { user } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
   const metrics = MOCK_DASHBOARD_METRICS;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleExport = () => {
     alert('Exporting dashboard report...');
@@ -33,6 +41,17 @@ export default function DashboardScreen() {
   const handleNewOrder = () => {
     alert('Initiating new eSIM order...');
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[75vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="text-sm font-semibold text-slate-500">Loading dashboard overview...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 select-none">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
@@ -14,7 +14,8 @@ import {
   ChevronDown,
   Check,
   SlidersHorizontal,
-  RotateCw
+  RotateCw,
+  Loader2
 } from 'lucide-react';
 import ESIMDetailView from './eSIMDetailView';
 
@@ -23,6 +24,12 @@ export default function InventoryScreen() {
   const [statusFilter, setStatusFilter] = useState<'All' | 'Available' | 'Assigned' | 'Active' | 'Expired' | 'Suspended'>('All');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [viewingIccid, setViewingIccid] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Filter items based on search and status
   const filteredItems = MOCK_ESIM_INVENTORY_ITEMS.filter((item) => {
@@ -40,6 +47,17 @@ export default function InventoryScreen() {
   const selectedItem = MOCK_ESIM_INVENTORY_ITEMS.find((item) => item.iccid === viewingIccid);
 
   // If viewing detail view, render eSIMDetailView component
+  if (isLoading) {
+    return (
+      <div className="flex h-[75vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="text-sm font-semibold text-slate-500">Loading eSIM stock...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (selectedItem) {
     return (
       <ESIMDetailView

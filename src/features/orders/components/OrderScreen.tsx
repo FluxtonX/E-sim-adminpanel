@@ -1,15 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { MOCK_ORDERS } from '@/constants/mockData';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 
 export default function OrderScreen() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Completed' | 'Active' | 'Pending' | 'Failed' | 'Expired'>('All');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredOrders = MOCK_ORDERS.filter((ord) => {
     const matchesSearch = ord.id.toLowerCase().includes(search.toLowerCase()) ||
@@ -19,6 +25,17 @@ export default function OrderScreen() {
     const matchesStatus = statusFilter === 'All' || ord.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[75vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="text-sm font-semibold text-slate-500">Loading order registry...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 select-none">

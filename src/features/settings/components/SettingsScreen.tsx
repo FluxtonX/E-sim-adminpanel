@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
@@ -7,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import { Loader2 } from 'lucide-react';
 
 const settingsSchema = zod.object({
   name: zod.string().min(1, 'Name is required'),
@@ -19,6 +21,12 @@ type SettingsFields = zod.infer<typeof settingsSchema>;
 
 export default function SettingsScreen() {
   const { user } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const {
     register,
@@ -40,6 +48,17 @@ export default function SettingsScreen() {
     console.log('Saved settings configuration:', data);
     alert('Settings updated successfully!');
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[75vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="text-sm font-semibold text-slate-500">Loading platform settings...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 select-none">

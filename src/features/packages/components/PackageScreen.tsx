@@ -1,16 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { MOCK_PACKAGES } from '@/constants/mockData';
-import { Award, Plane, Compass, Globe, Plus, Search } from 'lucide-react';
+import { Award, Plane, Compass, Globe, Plus, Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function PackageScreen() {
   const [search, setSearch] = useState('');
   const [regionFilter, setRegionFilter] = useState<'All' | 'Europe' | 'Asia Pacific' | 'Global' | 'North America'>('All');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredPackages = MOCK_PACKAGES.filter((pkg) => {
     const matchesSearch = pkg.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -18,6 +24,17 @@ export default function PackageScreen() {
     const matchesRegion = regionFilter === 'All' || pkg.region === regionFilter;
     return matchesSearch && matchesRegion;
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[75vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="text-sm font-semibold text-slate-500">Loading eSIM packages...</span>
+        </div>
+      </div>
+    );
+  }
 
   const getTagVariant = (tag: string) => {
     switch (tag.toLowerCase()) {
