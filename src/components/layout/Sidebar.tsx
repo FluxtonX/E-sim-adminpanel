@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
@@ -26,13 +27,17 @@ import {
   HelpCircle,
   Settings,
   LogOut,
-  Crown
+  Crown,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface SidebarItem {
   name: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  disabled?: boolean;
+  subItems?: { name: string; href: string }[];
 }
 
 interface SidebarSection {
@@ -45,6 +50,7 @@ export default function Sidebar() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { setSidebarOpen } = useUIStore();
+  const [packagesExpanded, setPackagesExpanded] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -67,7 +73,7 @@ export default function Sidebar() {
         { name: 'eSIM Management', href: '/dashboard/esim-management', icon: Cpu },
         { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
         { name: 'Customers', href: '/dashboard/customers', icon: Users },
-        { name: 'Merchants', href: '/dashboard/merchants', icon: Store },
+        { name: 'Merchants', href: '/dashboard/merchants', icon: Store, disabled: true },
       ],
     },
     {
@@ -82,7 +88,15 @@ export default function Sidebar() {
     {
       title: 'Management',
       items: [
-        { name: 'Packages', href: '/dashboard/packages', icon: Package },
+        {
+          name: 'Packages',
+          href: '/dashboard/packages',
+          icon: Package,
+          subItems: [
+            { name: 'All Packages', href: '/dashboard/packages' },
+            { name: 'Package Builder', href: '/dashboard/packages/builder' }
+          ]
+        },
         { name: 'Pricing Rules', href: '/dashboard/pricing-rules', icon: Percent },
         { name: 'API Management', href: '/dashboard/api-management', icon: Terminal },
         { name: 'Team Members', href: '/dashboard/team-members', icon: UserCheck },
@@ -144,6 +158,76 @@ export default function Sidebar() {
               {section.items.map((item) => {
                 const active = isActive(item.href);
                 const Icon = item.icon;
+                if (item.disabled) {
+                  return (
+                    <div
+                      key={item.name}
+                      className="flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-lg opacity-40 cursor-not-allowed text-slate-500 select-none group"
+                    >
+                      <Icon className="h-4.5 w-4.5 text-slate-500" />
+                      {item.name}
+                    </div>
+                  );
+                }
+                
+                if (item.subItems) {
+                  const isAnySubActive = item.subItems.some((sub) => pathname === sub.href);
+                  const isExpanded = item.name === 'Packages' ? packagesExpanded : false;
+                  
+                  return (
+                    <div key={item.name} className="space-y-0.5">
+                      <button
+                        onClick={() => {
+                          if (item.name === 'Packages') {
+                            setPackagesExpanded(!packagesExpanded);
+                          }
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-lg transition-all duration-150 group ${
+                          isAnySubActive && !isExpanded
+                            ? 'bg-blue-600/10 text-white font-bold border-l-2 border-blue-500'
+                            : 'hover:bg-slate-800/40 hover:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon
+                            className={`h-4.5 w-4.5 transition-colors ${
+                              isAnySubActive ? 'text-blue-500' : 'text-slate-500 group-hover:text-slate-300'
+                            }`}
+                          />
+                          <span>{item.name}</span>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
+                        ) : (
+                          <ChevronRight className="h-3.5 w-3.5 text-slate-500" />
+                        )}
+                      </button>
+                      
+                      {isExpanded && (
+                        <div className="pl-4.5 pr-2 py-0.5 space-y-0.5 border-l border-slate-800/40 ml-5">
+                          {item.subItems.map((sub) => {
+                            const subActive = pathname === sub.href;
+                            return (
+                              <Link
+                                key={sub.name}
+                                href={sub.href}
+                                onClick={() => setSidebarOpen(false)}
+                                className={`block px-3 py-1.5 text-[11px] font-semibold rounded-md transition-colors ${
+                                  subActive
+                                    ? 'text-blue-500 font-bold bg-blue-500/5'
+                                    : 'text-slate-400 hover:text-slate-250 hover:bg-slate-800/20'
+                                }`}
+                              >
+                                {sub.name}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.name}

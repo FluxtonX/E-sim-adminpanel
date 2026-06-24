@@ -29,9 +29,10 @@ import {
 interface eSIMDetailViewProps {
   item: eSIMItem;
   onBack: () => void;
+  backLabel?: string;
 }
 
-export default function ESIMDetailView({ item, onBack }: eSIMDetailViewProps) {
+export default function ESIMDetailView({ item, onBack, backLabel = 'Back to Inventory' }: eSIMDetailViewProps) {
   // 7-day usage mock data matching the screenshot wavy points
   const dailyUsageData = [
     { day: 'Day 1', usage: 0.55 },
@@ -62,7 +63,7 @@ export default function ESIMDetailView({ item, onBack }: eSIMDetailViewProps) {
           className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors w-max"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Inventory
+          {backLabel}
         </button>
       </div>
 

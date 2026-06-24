@@ -1,4 +1,4 @@
-import { Merchant, eSIMItem, Package, Order, Invoice, ActivityLog, SalesDataPoint } from '@/types';
+import { Merchant, eSIMItem, Package, Order, Invoice, ActivityLog, SalesDataPoint, Customer } from '@/types';
 
 export const MOCK_DASHBOARD_METRICS = {
   totalInventory: {
@@ -59,16 +59,16 @@ export const MOCK_MERCHANTS: Merchant[] = [
 ];
 
 export const MOCK_ORDERS: Order[] = [
-  { id: 'ORD-2024-001', customerName: 'James Wilson', customerEmail: 'j.wilson@email.com', packageName: 'Europe 10GB', region: 'Europe', amount: 24.99, status: 'Completed', date: 'Dec 20, 2026' },
-  { id: 'ORD-2024-002', customerName: 'Sarah Chen', customerEmail: 's.chen@email.com', packageName: 'Asia Pacific 10GB', region: 'Asia Pacific', amount: 14.99, status: 'Active', date: 'Dec 20, 2026' },
-  { id: 'ORD-2024-003', customerName: 'Marco Rossi', customerEmail: 'm.rossi@email.com', packageName: 'Global Explorer 50GB', region: 'Global', amount: 59.99, status: 'Pending', date: 'Dec 20, 2026' },
-  { id: 'ORD-2024-004', customerName: 'Aisha Patel', customerEmail: 'a.patel@email.com', packageName: 'North America 20GB', region: 'North America', amount: 34.99, status: 'Completed', date: 'Dec 19, 2026' },
-  { id: 'ORD-2024-005', customerName: 'Lucas Müller', customerEmail: 'l.muller@email.com', packageName: 'Middle East 5GB', region: 'Middle East', amount: 9.99, status: 'Failed', date: 'Dec 19, 2026' },
-  { id: 'ORD-2024-006', customerName: 'Emma Thompson', customerEmail: 'e.thompson@email.com', packageName: 'Japan Premium 10GB', region: 'Asia', amount: 29.99, status: 'Completed', date: 'Dec 18, 2026' },
-  { id: 'ORD-2024-007', customerName: 'Carlos Garcia', customerEmail: 'c.garcia@email.com', packageName: 'Latin America 8GB', region: 'Latin America', amount: 19.99, status: 'Active', date: 'Dec 18, 2026' },
-  { id: 'ORD-2024-008', customerName: 'Yuki Tanaka', customerEmail: 'y.tanaka@email.com', packageName: 'Europe 10GB', region: 'Europe', amount: 24.99, status: 'Expired', date: 'Dec 17, 2026' },
-  { id: 'ORD-2024-009', customerName: 'Ali Hassan', customerEmail: 'a.hassan@email.com', packageName: 'Africa Connect 5GB', region: 'Africa', amount: 12.99, status: 'Completed', date: 'Dec 17, 2026' },
-  { id: 'ORD-2024-010', customerName: 'Priya Sharma', customerEmail: 'p.sharma@email.com', packageName: 'India 10GB', region: 'Asia', amount: 11.99, status: 'Pending', date: 'Dec 16, 2026' },
+  { id: 'ORD-2024-001', customerName: 'James Wilson', customerEmail: 'j.wilson@email.com', packageName: 'Europe 10GB', region: 'Europe', amount: 24.99, status: 'Completed', date: 'Dec 15, 24' },
+  { id: 'ORD-2024-002', customerName: 'Sarah Chen', customerEmail: 's.chen@email.com', packageName: 'Asia Pacific 5GB', region: 'Asia Pacific', amount: 14.99, status: 'Active', date: 'Dec 15, 24' },
+  { id: 'ORD-2024-003', customerName: 'Marco Rossi', customerEmail: 'm.rossi@email.com', packageName: 'Global Explorer 50GB', region: 'Global', amount: 59.99, status: 'Pending', date: 'Dec 14, 24' },
+  { id: 'ORD-2024-004', customerName: 'Aisha Patel', customerEmail: 'a.patel@email.com', packageName: 'North America 20GB', region: 'North America', amount: 34.99, status: 'Completed', date: 'Dec 14, 24' },
+  { id: 'ORD-2024-005', customerName: 'Lucas Müller', customerEmail: 'l.muller@email.com', packageName: 'Middle East 3GB', region: 'Middle East', amount: 9.99, status: 'Failed', date: 'Dec 13, 24' },
+  { id: 'ORD-2024-006', customerName: 'Emma Thompson', customerEmail: 'e.thompson@email.com', packageName: 'Japan Premium 15GB', region: 'Asia', amount: 29.99, status: 'Completed', date: 'Dec 13, 24' },
+  { id: 'ORD-2024-007', customerName: 'Carlos Garcia', customerEmail: 'c.garcia@email.com', packageName: 'Latin America 8GB', region: 'Latin America', amount: 19.99, status: 'Active', date: 'Dec 12, 24' },
+  { id: 'ORD-2024-008', customerName: 'Yuki Tanaka', customerEmail: 'y.tanaka@email.com', packageName: 'Europe 10GB', region: 'Europe', amount: 24.99, status: 'Expired', date: 'Dec 12, 24' },
+  { id: 'ORD-2024-009', customerName: 'Ali Hassan', customerEmail: 'a.hassan@email.com', packageName: 'Africa Connect 5GB', region: 'Africa', amount: 12.99, status: 'Completed', date: 'Dec 11, 24' },
+  { id: 'ORD-2024-010', customerName: 'Priya Sharma', customerEmail: 'p.sharma@email.com', packageName: 'India 10GB', region: 'Asia', amount: 11.99, status: 'Pending', date: 'Dec 11, 24' },
 ];
 
 export const MOCK_PACKAGES: Package[] = [
@@ -79,11 +79,12 @@ export const MOCK_PACKAGES: Package[] = [
 ];
 
 export const MOCK_INVOICES: Invoice[] = [
-  { id: 'INV-2026-089', merchantName: 'TravelTech Solutions', amount: 12450.00, status: 'Paid', dueDate: '2026-07-01', issueDate: '2026-06-01' },
-  { id: 'INV-2026-090', merchantName: 'GlobalConnect Ltd', amount: 8900.00, status: 'Paid', dueDate: '2026-07-01', issueDate: '2026-06-01' },
-  { id: 'INV-2026-091', merchantName: 'NomadSIM', amount: 4890.00, status: 'Unpaid', dueDate: '2026-07-05', issueDate: '2026-06-05' },
-  { id: 'INV-2026-092', merchantName: 'RoamEasy Inc', amount: 6200.00, status: 'Overdue', dueDate: '2026-06-15', issueDate: '2026-05-15' },
-  { id: 'INV-2026-093', merchantName: 'AsiaTel Partners', amount: 3380.00, status: 'Paid', dueDate: '2026-06-30', issueDate: '2026-05-30' },
+  { id: 'INV-2024-012', merchantName: 'TravelTech Solutions', amount: 84200.00, status: 'Completed', dueDate: 'Dec 30', issueDate: 'Dec 15' },
+  { id: 'INV-2024-011', merchantName: 'GlobalConnect Ltd', amount: 62400.00, status: 'Pending', dueDate: 'Dec 25', issueDate: 'Dec 10' },
+  { id: 'INV-2024-010', merchantName: 'NomadSIM', amount: 48900.00, status: 'Completed', dueDate: 'Dec 20', issueDate: 'Dec 5' },
+  { id: 'INV-2024-009', merchantName: 'RoamEasy Inc', amount: 41200.00, status: 'Pending', dueDate: 'Dec 16', issueDate: 'Dec 1' },
+  { id: 'INV-2024-008', merchantName: 'AsiaTel Partners', amount: 33800.00, status: 'Completed', dueDate: 'Dec 13', issueDate: 'Nov 28' },
+  { id: 'INV-2024-007', merchantName: 'Pacific Connect', amount: 25100.00, status: 'Expired', dueDate: 'Dec 5', issueDate: 'Nov 20' }
 ];
 
 export const MOCK_ACTIVITY_LOGS: ActivityLog[] = [
@@ -117,7 +118,7 @@ export const MOCK_ESIM_INVENTORY_ITEMS: eSIMItem[] = [
     packageName: 'Europe 10GB',
     country: 'United Kingdom',
     network: 'EE',
-    activationDate: 'Dec 1, 2024',
+    activationDate: 'Dec 1',
     expiryDate: 'Dec 31, 2024'
   },
   {
@@ -140,7 +141,7 @@ export const MOCK_ESIM_INVENTORY_ITEMS: eSIMItem[] = [
     packageName: 'North America 20GB',
     country: 'United States',
     network: 'T-Mobile',
-    activationDate: 'Nov 20, 2024',
+    activationDate: 'Nov 20',
     expiryDate: 'Dec 20, 2024'
   },
   {
@@ -153,7 +154,7 @@ export const MOCK_ESIM_INVENTORY_ITEMS: eSIMItem[] = [
     packageName: 'Europe 10GB',
     country: 'Germany',
     network: 'Deutsche Telekom',
-    activationDate: 'Nov 30, 2024',
+    activationDate: 'Nov 1',
     expiryDate: 'Dec 30, 2024'
   },
   {
@@ -187,7 +188,7 @@ export const MOCK_ESIM_INVENTORY_ITEMS: eSIMItem[] = [
     packageName: 'Latin America 8GB',
     country: 'Mexico',
     network: 'Telcel',
-    activationDate: 'Jan 10, 2025',
+    activationDate: 'Dec 10',
     expiryDate: 'Feb 10, 2025'
   },
   {
@@ -200,7 +201,7 @@ export const MOCK_ESIM_INVENTORY_ITEMS: eSIMItem[] = [
     packageName: 'Middle East 5GB',
     country: 'UAE',
     network: 'Etisalat',
-    activationDate: 'Jan 5, 2025',
+    activationDate: 'Dec 5',
     expiryDate: 'Feb 5, 2025'
   },
   {
@@ -223,7 +224,22 @@ export const MOCK_ESIM_INVENTORY_ITEMS: eSIMItem[] = [
     packageName: 'Asia Pacific 20GB',
     country: 'Australia',
     network: 'Telstra',
-    activationDate: 'Jan 8, 2025',
+    activationDate: 'Dec 8',
     expiryDate: 'Feb 8, 2025'
   }
+];
+
+export const MOCK_CUSTOMERS: Customer[] = [
+  { id: 'cust-001', name: 'James Wilson', email: 'j.wilson@email.com', country: 'United Kingdom', esimsCount: 3, totalSpend: 124.97, joined: 'Mar 2024', status: 'Active' },
+  { id: 'cust-002', name: 'Sarah Chen', email: 's.chen@email.com', country: 'Singapore', esimsCount: 5, totalSpend: 189.95, joined: 'Feb 2024', status: 'Active' },
+  { id: 'cust-003', name: 'Marco Rossi', email: 'm.rossi@email.com', country: 'Italy', esimsCount: 2, totalSpend: 69.98, joined: 'May 2024', status: 'Active' },
+  { id: 'cust-004', name: 'Aisha Patel', email: 'a.patel@email.com', country: 'India', esimsCount: 4, totalSpend: 154.96, joined: 'Jan 2024', status: 'Active' },
+  { id: 'cust-005', name: 'Lucas Müller', email: 'l.muller@email.com', country: 'Germany', esimsCount: 1, totalSpend: 24.99, joined: 'Jul 2024', status: 'Inactive' },
+  { id: 'cust-006', name: 'Emma Thompson', email: 'e.thompson@email.com', country: 'Australia', esimsCount: 6, totalSpend: 284.94, joined: 'Nov 2023', status: 'Active' },
+  { id: 'cust-007', name: 'Carlos Garcia', email: 'c.garcia@email.com', country: 'Mexico', esimsCount: 2, totalSpend: 54.98, joined: 'Aug 2024', status: 'Active' },
+  { id: 'cust-008', name: 'Yuki Tanaka', email: 'y.tanaka@email.com', country: 'Japan', esimsCount: 4, totalSpend: 159.96, joined: 'Apr 2024', status: 'Active' },
+  { id: 'cust-009', name: 'Ali Hassan', email: 'a.hassan@email.com', country: 'UAE', esimsCount: 3, totalSpend: 89.97, joined: 'Jun 2024', status: 'Active' },
+  { id: 'cust-010', name: 'Priya Sharma', email: 'p.sharma@email.com', country: 'India', esimsCount: 2, totalSpend: 44.98, joined: 'Sep 2024', status: 'Active' },
+  { id: 'cust-011', name: 'Mohammed Al-Farsi', email: 'm.alfarsi@email.com', country: 'Oman', esimsCount: 1, totalSpend: 19.99, joined: 'Oct 2024', status: 'Inactive' },
+  { id: 'cust-012', name: 'Sophie Dubois', email: 's.dubois@email.com', country: 'France', esimsCount: 7, totalSpend: 349.93, joined: 'Dec 2023', status: 'Active' }
 ];
