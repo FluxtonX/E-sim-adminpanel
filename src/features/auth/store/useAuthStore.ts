@@ -17,18 +17,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   initialize: () => {
     if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('esim_admin_user');
-      if (storedUser) {
-        try {
-          const parsed = JSON.parse(storedUser);
-          set({ user: parsed, isAuthenticated: true, isLoading: false });
-          return;
-        } catch {
-          localStorage.removeItem('esim_admin_user');
-        }
-      }
+      localStorage.removeItem('esim_admin_user');
     }
-    set({ isLoading: false });
+    set({ user: null, isAuthenticated: false, isLoading: false });
   },
 
   login: async (email, password) => {
@@ -38,7 +29,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     // Admin login validation (static mock credentials)
-    if (email === 'admin@esim.com' && password === 'admin123') {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+    if (cleanEmail === 'admin@esim.com' && cleanPassword === 'admin123') {
       const mockUser: User = {
         id: 'usr-001',
         name: 'Khalid Al-Rashid',

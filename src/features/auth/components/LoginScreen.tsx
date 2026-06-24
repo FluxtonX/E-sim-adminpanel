@@ -107,7 +107,7 @@ export default function LoginScreen() {
                   id="email"
                   type="email"
                   placeholder="name@company.com"
-                  {...register('register' in register ? 'email' : 'email')}
+                  {...register('email')}
                   className={`block w-full rounded-xl border ${
                     errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-100'
                   } bg-slate-50 py-3 pl-10 pr-4 text-sm font-medium text-slate-900 outline-none transition-all focus:bg-white focus:ring-4 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:focus:bg-slate-900`}
