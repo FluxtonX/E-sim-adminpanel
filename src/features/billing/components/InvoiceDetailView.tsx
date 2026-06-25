@@ -13,10 +13,15 @@ import {
   Building
 } from 'lucide-react';
 
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { useToastStore } from '@/store/useToastStore';
+import { downloadPDF } from '@/services/mockDownloadService';
+
 interface InvoiceDetailViewProps {
   invoice: Invoice;
   onBack: () => void;
 }
+
 
 export default function InvoiceDetailView({ invoice, onBack }: InvoiceDetailViewProps) {
   
@@ -51,13 +56,53 @@ export default function InvoiceDetailView({ invoice, onBack }: InvoiceDetailView
   const tax = +(subtotal * 0.05).toFixed(2); // 5% VAT/Surcharge mock
   const grandTotal = +(subtotal + tax).toFixed(2);
 
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
+  const addToast = useToastStore((s) => s.addToast);
+
   const handlePrint = () => {
-    alert(`Printing statement for Invoice ${invoice.id}...`);
+    startSimulation(
+      `Preparing Statement Print for Invoice ${invoice.id}`,
+      ['Accessing local database...', 'Generating clean printable document...', 'Connecting to default printer spooler...'],
+      () => {
+        window.print();
+        addToast(`Sent Invoice ${invoice.id} print job to printer spooler.`, 'success');
+      }
+    );
   };
 
   const handleDownload = () => {
-    alert(`Downloading Invoice receipt PDF for ${invoice.id}...`);
+    startSimulation(
+      `Compiling Invoice Receipt PDF`,
+      ['Locating invoice records...', 'Generating cryptographic hash...', 'Structuring PDF content layout...', 'Initiating browser file download...'],
+      () => {
+        const textContent = `
+========================================
+INVOICE RECEIPT - FLUXTONX ESIM PLATFORM
+========================================
+Invoice ID: ${invoice.id}
+Recipient: ${invoice.merchantName}
+Issue Date: ${invoice.issueDate}
+Due Date: ${invoice.dueDate}
+Status: ${invoice.status}
+
+LINE ITEMS:
+----------------------------------------
+1. Data Package Purchase
+   Amount: $${invoice.amount.toFixed(2)}
+2. Platform Surcharge (5% VAT)
+   Amount: $${(invoice.amount * 0.05).toFixed(2)}
+
+----------------------------------------
+TOTAL PAID: $${(invoice.amount * 1.05).toFixed(2)}
+========================================
+Thank you for using FluxtonX eSIM Services.
+        `;
+        downloadPDF(`Invoice_${invoice.id}`, textContent);
+        addToast(`Invoice PDF receipt for ${invoice.id} downloaded successfully!`, 'success');
+      }
+    );
   };
+
 
   return (
     <div className="space-y-6 select-none animate-fadeIn">

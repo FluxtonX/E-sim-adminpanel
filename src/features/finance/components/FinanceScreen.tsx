@@ -15,8 +15,12 @@ import {
   Loader2,
   Download
 } from 'lucide-react';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadCSV } from '@/services/mockDownloadService';
 import {
   AreaChart,
+
   Area,
   BarChart,
   Bar,
@@ -126,6 +130,9 @@ const MOCK_TRANSACTIONS = [
 
 export default function FinanceScreen() {
   const [isLoading, setIsLoading] = useState(true);
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
+
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -158,7 +165,23 @@ export default function FinanceScreen() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => alert('Exporting financial report...')}
+            onClick={() => {
+              startSimulation(
+                'Exporting Financial Performance Ledger',
+                ['Accessing revenue accounts...', 'Structuring cashflow data...', 'Packaging CSV matrix...'],
+                () => {
+                  const headers = ['Report Metric', 'Value', 'Status'];
+                  const rows = [
+                    ['Total Revenue', '$284,920', 'Healthy'],
+                    ['Active Users Margin', '14.2%', 'Growing'],
+                    ['eSIM Provision Expense', '$42,500', 'Optimized'],
+                    ['Net Margin Revenue', '$242,420', 'Target Achieved']
+                  ];
+                  downloadCSV('Financial_Report_Export', headers, rows);
+                  addToast('Financial performance report exported successfully!', 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white dark:bg-slate-950 dark:text-slate-350 dark:border-slate-800"
           >
             <Download className="h-4 w-4" />

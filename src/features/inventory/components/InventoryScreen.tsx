@@ -6,6 +6,10 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { MOCK_ESIM_INVENTORY_ITEMS } from '@/constants/mockData';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadCSV } from '@/services/mockDownloadService';
+import { eSIMItem } from '@/types';
 import {
   Upload,
   Download,
@@ -20,11 +24,14 @@ import {
 import ESIMDetailView from './eSIMDetailView';
 
 export default function InventoryScreen() {
+  const [inventory, setInventory] = useState<eSIMItem[]>(MOCK_ESIM_INVENTORY_ITEMS);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Available' | 'Assigned' | 'Active' | 'Expired' | 'Suspended'>('All');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [viewingIccid, setViewingIccid] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -32,7 +39,7 @@ export default function InventoryScreen() {
   }, []);
 
   // Filter items based on search and status
-  const filteredItems = MOCK_ESIM_INVENTORY_ITEMS.filter((item) => {
+  const filteredItems = inventory.filter((item) => {
     const matchesSearch =
       item.iccid.includes(search) ||
       (item.packageName && item.packageName.toLowerCase().includes(search.toLowerCase())) ||
@@ -44,7 +51,8 @@ export default function InventoryScreen() {
   });
 
   // Find the currently selected eSIM item for detail page
-  const selectedItem = MOCK_ESIM_INVENTORY_ITEMS.find((item) => item.iccid === viewingIccid);
+  const selectedItem = inventory.find((item) => item.iccid === viewingIccid);
+
 
   // If viewing detail view, render eSIMDetailView component
   if (isLoading) {
@@ -84,7 +92,15 @@ export default function InventoryScreen() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => alert('Importing eSIM stock...')}
+            onClick={() => {
+              startSimulation(
+                'Importing eSIM Bulk Stock',
+                ['Reading CSV stock sheet...', 'Validating profile ICCIDs...', 'Updating platform cache...', 'Completing ledger record...'],
+                () => {
+                  addToast('Bulk stock file parsed and imported successfully!', 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
           >
             <Upload className="h-3.5 w-3.5" />
@@ -93,7 +109,18 @@ export default function InventoryScreen() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => alert('Exporting eSIM inventory...')}
+            onClick={() => {
+              startSimulation(
+                'Exporting eSIM Inventory Data',
+                ['Scanning stock catalog...', 'Filtering record criteria...', 'Streaming CSV content...'],
+                () => {
+                  const headers = ['ICCID', 'Status', 'Provider', 'Package', 'Country'];
+                  const rows = inventory.map(item => [item.iccid, item.status, item.provider, item.packageName || '', item.country || '']);
+                  downloadCSV('eSIM_Inventory_Export', headers, rows);
+                  addToast('eSIM inventory exported successfully!', 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
           >
             <Download className="h-3.5 w-3.5" />
@@ -102,7 +129,26 @@ export default function InventoryScreen() {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => alert('Opening onboarding inventory dialog...')}
+            onClick={() => {
+              startSimulation(
+                'Onboarding New eSIM Inventory Stock',
+                ['Generating ICCID batches...', 'Querying Truphone SM-DP+ provider APIs...', 'Storing secure credentials...', 'Completing stock placement...'],
+                () => {
+                  const mockNewItem: eSIMItem = {
+                    iccid: `890490320000${Math.floor(10000000 + Math.random() * 90000000)}`,
+                    status: 'Available',
+                    provider: 'Deutsche Telekom',
+                    dataLimitGb: 10,
+                    dataUsedGb: 0,
+                    packageName: 'Europe Basic Pass',
+                    country: 'Germany',
+                    network: 'LTE/5G'
+                  };
+                  setInventory((prev) => [mockNewItem, ...prev]);
+                  addToast('Successfully added 1 new eSIM profile to inventory stock!', 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 shadow-md shadow-blue-500/10"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -248,7 +294,7 @@ export default function InventoryScreen() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => alert('Additional filters panel...')}
+              onClick={() => addToast('Additional filters panel coming soon!', 'info')}
               className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
             >
               <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />

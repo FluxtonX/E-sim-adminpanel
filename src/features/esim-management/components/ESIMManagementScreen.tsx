@@ -6,6 +6,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { MOCK_ESIM_INVENTORY_ITEMS } from '@/constants/mockData';
+import { eSIMItem } from '@/types';
 import {
   Plus,
   Search,
@@ -16,13 +17,18 @@ import {
   Eye
 } from 'lucide-react';
 import ESIMDetailView from '@/features/inventory/components/eSIMDetailView';
+import AssignESIMModal from './AssignESIMModal';
+import { useToastStore } from '@/store/useToastStore';
 
 export default function ESIMManagementScreen() {
+  const [items, setItems] = useState<eSIMItem[]>(MOCK_ESIM_INVENTORY_ITEMS);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Available' | 'Assigned' | 'Active' | 'Expired' | 'Suspended'>('All');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [viewingIccid, setViewingIccid] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const addToast = useToastStore((s) => s.addToast);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -30,7 +36,7 @@ export default function ESIMManagementScreen() {
   }, []);
 
   // Filter items based on search and status
-  const filteredItems = MOCK_ESIM_INVENTORY_ITEMS.filter((item) => {
+  const filteredItems = items.filter((item) => {
     const matchesSearch =
       item.iccid.includes(search) ||
       (item.packageName && item.packageName.toLowerCase().includes(search.toLowerCase())) ||
@@ -42,7 +48,8 @@ export default function ESIMManagementScreen() {
   });
 
   // Find the currently selected eSIM item for detail page
-  const selectedItem = MOCK_ESIM_INVENTORY_ITEMS.find((item) => item.iccid === viewingIccid);
+  const selectedItem = items.find((item) => item.iccid === viewingIccid);
+
 
   if (isLoading) {
     return (
@@ -82,7 +89,7 @@ export default function ESIMManagementScreen() {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => alert('Assigning new eSIM...')}
+            onClick={() => setIsAssignModalOpen(true)}
             className="flex items-center gap-1.5 shadow-md shadow-blue-500/10"
           >
             <Plus className="h-4 w-4" />
@@ -154,7 +161,7 @@ export default function ESIMManagementScreen() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => alert('Filter customization coming soon...')}
+              onClick={() => addToast('Filter customization coming soon!', 'info')}
               className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
             >
               <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />
@@ -273,6 +280,14 @@ export default function ESIMManagementScreen() {
         </Table>
       </Card>
 
+      <AssignESIMModal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        onAssign={(newItem) => {
+          setItems((prev) => [newItem, ...prev]);
+          addToast(`eSIM Profile assigned to "${newItem.allocatedTo}" successfully!`, 'success');
+        }}
+      />
     </div>
   );
 }

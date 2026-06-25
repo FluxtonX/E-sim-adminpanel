@@ -6,6 +6,9 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { TransactionRecord } from '@/types';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadCSV } from '@/services/mockDownloadService';
 import {
   ArrowUpRight,
   ArrowDownLeft,
@@ -117,9 +120,12 @@ const MOCK_TRANSACTIONS: TransactionRecord[] = [
 export default function TransactionsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [transactions] = useState<TransactionRecord[]>(MOCK_TRANSACTIONS);
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
   
   // Search & filter states
   const [searchQuery, setSearchQuery] = useState('');
+
   const [selectedType, setSelectedType] = useState<'All' | 'Credit' | 'Debit'>('All');
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
   const [viewingTransaction, setViewingTransaction] = useState<TransactionRecord | null>(null);
@@ -184,7 +190,18 @@ export default function TransactionsScreen() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => alert('Exporting platform transactions log...')}
+            onClick={() => {
+              startSimulation(
+                'Exporting Platform Transactions Ledger',
+                ['Scanning audit blocks...', 'Sanitizing merchant references...', 'Generating CSV spreadsheet...'],
+                () => {
+                  const headers = ['Transaction ID', 'Merchant', 'Type', 'Description', 'Amount', 'Date', 'Status'];
+                  const rows = transactions.map(tx => [tx.id, tx.merchant, tx.type, tx.description, tx.amount, tx.date, tx.status]);
+                  downloadCSV('Platform_Transactions_Export', headers, rows);
+                  addToast('Transactions log exported successfully!', 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white dark:bg-slate-950 dark:text-slate-350 dark:border-slate-800"
           >
             <Download className="h-4 w-4" />
@@ -301,7 +318,7 @@ export default function TransactionsScreen() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => alert('Additional status filters coming soon!')}
+            onClick={() => addToast('Additional status filters coming soon!', 'info')}
             className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
           >
             <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />

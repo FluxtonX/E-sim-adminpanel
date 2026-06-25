@@ -10,6 +10,7 @@ interface ActionItem {
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   href: string;
+  disabled?: boolean;
 }
 
 export default function QuickActions() {
@@ -34,6 +35,7 @@ export default function QuickActions() {
       icon: UserPlus,
       color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400',
       href: '/dashboard/merchants',
+      disabled: true,
     },
     {
       title: 'Generate Invoice',
@@ -53,10 +55,39 @@ export default function QuickActions() {
 
   return (
     <div className="space-y-3 select-none">
-      <h3 className="text-sm font-bold text-slate-800 dark:text-white pl-1">Quick Actions</h3>
+      <h3 className="text-sm font-bold text-slate-880 dark:text-white pl-1">Quick Actions</h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {actions.map((act) => {
           const Icon = act.icon;
+          if (act.disabled) {
+            return (
+              <div
+                key={act.title}
+                className="opacity-40 cursor-not-allowed select-none"
+              >
+                <Card className="h-full border-slate-100">
+                  <CardContent className="p-5 flex flex-col items-center text-center justify-between h-full gap-3">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${act.color}`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <h4 className="text-xs font-bold text-slate-850 dark:text-white leading-snug">
+                          {act.title}
+                        </h4>
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-slate-100 text-slate-500 border border-slate-200/50 dark:bg-slate-900 dark:border-slate-800">
+                          Inactive
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-semibold mt-1 leading-normal">{act.desc}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-slate-300 mt-1" />
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          }
+
           return (
             <motion.a
               key={act.title}

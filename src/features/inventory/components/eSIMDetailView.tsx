@@ -4,6 +4,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { eSIMItem } from '@/types';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadQRCode } from '@/services/mockDownloadService';
+
 import {
   ArrowLeft,
   Power,
@@ -50,8 +54,11 @@ export default function ESIMDetailView({ item, onBack, backLabel = 'Back to Inve
   const remaining = Math.max(0, limit - used);
   const percentage = Math.round((used / limit) * 100);
 
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
+
   const handleAction = (actionName: string) => {
-    alert(`eSIM Action "${actionName}" triggered for ICCID ${item.iccid}`);
+    addToast(`eSIM Action "${actionName}" triggered for ICCID ${item.iccid}`, 'success');
   };
 
   return (
@@ -373,7 +380,14 @@ export default function ESIMDetailView({ item, onBack, backLabel = 'Back to Inve
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => alert(`LPA code copied for ICCID ${item.iccid}`)}
+                  onClick={() => {
+                    const lpaCode = `LPA:1$rsp.truphone.com$${item.iccid}`;
+                    navigator.clipboard.writeText(lpaCode).then(() => {
+                      addToast(`LPA code copied for ICCID ${item.iccid}`, 'success');
+                    }).catch(() => {
+                      addToast(`Failed to copy LPA code`, 'error');
+                    });
+                  }}
                   className="flex-1 flex items-center justify-center gap-1.5 text-xs border-slate-200 bg-white"
                 >
                   <Copy className="h-3.5 w-3.5" />
@@ -382,7 +396,16 @@ export default function ESIMDetailView({ item, onBack, backLabel = 'Back to Inve
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => alert(`Downloading QR code image...`)}
+                  onClick={() => {
+                    startSimulation(
+                      'Downloading eSIM QR Code Profile',
+                      ['Initializing security certificate...', 'Rendering QR matrix blocks...', 'Downloading SVG vector asset...'],
+                      () => {
+                        downloadQRCode(`eSIM_QR_${item.iccid}`, item.iccid);
+                        addToast(`eSIM QR Code downloaded successfully!`, 'success');
+                      }
+                    );
+                  }}
                   className="flex-1 flex items-center justify-center gap-1.5 text-xs shadow-md shadow-blue-500/10"
                 >
                   <Download className="h-3.5 w-3.5" />

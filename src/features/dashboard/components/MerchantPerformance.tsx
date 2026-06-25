@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { MOCK_MERCHANTS } from '@/constants/mockData';
 import { ArrowUpRight } from 'lucide-react';
@@ -14,42 +13,42 @@ export default function MerchantPerformance() {
     return `$${(value / 1000).toFixed(1)}k`;
   };
 
-  // Render a detailed SVG logo representing the circular globoids from the figma mockup
+  // Render a profile photo of the merchant
   const getMerchantLogo = (name: string) => {
-    const colors: Record<string, { bg: string, stroke: string }> = {
-      'TravelTech Solutions': { bg: 'from-slate-700 to-slate-900', stroke: '#3b82f6' },
-      'GlobalConnect Ltd': { bg: 'from-indigo-600 to-purple-800', stroke: '#a78bfa' },
-      'NomadSIM': { bg: 'from-emerald-500 to-teal-800', stroke: '#6ee7b7' },
-      'RoamEasy Inc': { bg: 'from-amber-500 to-orange-700', stroke: '#fbd5c0' },
-      'AsiaTel Partners': { bg: 'from-cyan-600 to-blue-800', stroke: '#67e8f9' },
-      'EuroTravel Mobile': { bg: 'from-rose-600 to-red-800', stroke: '#fca5a5' },
+    const photos: Record<string, string> = {
+      'TravelTech Solutions': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80',
+      'GlobalConnect Ltd': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80',
+      'NomadSIM': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100&q=80',
+      'RoamEasy Inc': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80',
+      'AsiaTel Partners': 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&h=100&q=80',
+      'EuroTravel Mobile': 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&h=100&q=80',
     };
 
-    const theme = colors[name] || { bg: 'from-slate-700 to-slate-800', stroke: '#cbd5e1' };
+    const photoUrl = photos[name] || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80';
 
     return (
-      <div className={`h-7 w-7 rounded-full bg-gradient-to-br ${theme.bg} p-1 flex items-center justify-center shadow-inner shrink-0 overflow-hidden`}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1" className="w-full h-full opacity-85">
-          <circle cx="12" cy="12" r="9" stroke={theme.stroke} strokeWidth="1" />
-          <path d="M12 3a9 9 0 0 0 0 18" stroke={theme.stroke} />
-          <path d="M12 3c-3 0-5.5 4-5.5 9s2.5 9 5.5 9" stroke={theme.stroke} />
-          <path d="M12 3c3 0 5.5 4 5.5 9s-2.5 9-5.5 9" stroke={theme.stroke} />
-          <path d="M3 12h18" stroke={theme.stroke} />
-          <path d="M4.5 7.5h15" stroke={theme.stroke} />
-          <path d="M4.5 16.5h15" stroke={theme.stroke} />
-        </svg>
-      </div>
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={photoUrl}
+        alt={name}
+        className="h-7 w-7 rounded-full object-cover shadow-sm border border-slate-100 dark:border-slate-800 shrink-0"
+      />
     );
   };
 
   return (
-    <Card className="border-slate-100 h-full flex flex-col justify-between select-none">
+    <Card className="border-slate-100 h-full flex flex-col justify-between select-none opacity-40 cursor-not-allowed">
       <div>
-        <CardHeader className="border-slate-100/50 pb-3">
-          <CardTitle className="text-sm font-bold text-slate-800 dark:text-white">Merchant Performance</CardTitle>
-          <Link href="/dashboard/merchants" className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+        <CardHeader className="border-slate-100/50 pb-3 flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-bold text-slate-800 dark:text-white">Merchant Performance</CardTitle>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-slate-100 text-slate-500 border border-slate-200/50 dark:bg-slate-900 dark:border-slate-800">
+              Inactive
+            </span>
+          </div>
+          <div className="text-xs font-bold text-slate-400 cursor-not-allowed select-none">
             View all →
-          </Link>
+          </div>
         </CardHeader>
         
         <CardContent className="p-0">

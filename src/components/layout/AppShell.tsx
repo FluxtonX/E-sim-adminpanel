@@ -3,6 +3,8 @@
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import MobileDrawer from './MobileDrawer';
+import ToastContainer from '@/components/ui/Toast';
+import SimulatedProgressModal from '@/components/ui/SimulatedProgressModal';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -33,6 +35,11 @@ export default function AppShell({ children }: AppShellProps) {
 
       {/* Mobile Drawer (visible below lg breakpoint) */}
       <MobileDrawer />
+
+      {/* Global Utilities */}
+      <ToastContainer />
+      <SimulatedProgressModal />
     </div>
   );
 }
+

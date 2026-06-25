@@ -6,8 +6,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { analyticsService } from '../services/analytics.service';
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   PieChart,
@@ -17,8 +15,14 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  AreaChart,
+  Area
 } from 'recharts';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadCSV } from '@/services/mockDownloadService';
+
 import {
   TrendingUp,
   Wifi,
@@ -122,6 +126,9 @@ const AustraliaFlag = () => (
 
 export default function AnalyticsScreen() {
   const [trendRange, setTrendRange] = useState<'7days' | '30days' | '12months'>('7days');
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
+
 
   // Fetch data using TanStack Query
   const { data: metrics, isLoading: isMetricsLoading } = useQuery({
@@ -195,11 +202,45 @@ export default function AnalyticsScreen() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => alert('Exporting analytics insights...')} className="flex items-center gap-1.5 border-slate-200">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              startSimulation(
+                'Exporting Analytics Insights',
+                ['Aggregating revenue channels...', 'Compiling country sales ratios...', 'Writing CSV payload...'],
+                () => {
+                  const headers = ['Country', 'Sales Volume', 'Active Connections'];
+                  const rows = [
+                    ['United Kingdom', '1,420', '1,280'],
+                    ['Germany', '850', '800'],
+                    ['Japan', '620', '600'],
+                    ['Singapore', '430', '410']
+                  ];
+                  downloadCSV('Analytics_Insights_Export', headers, rows);
+                  addToast('Analytics insights exported to CSV successfully!', 'success');
+                }
+              );
+            }}
+            className="flex items-center gap-1.5 border-slate-200"
+          >
             <FileDown className="h-4 w-4" />
             Export
           </Button>
-          <Button variant="primary" size="sm" onClick={() => alert('Onboarding new eSIM connection...')} className="flex items-center gap-1.5 shadow-md shadow-blue-500/10">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              startSimulation(
+                'Onboarding New eSIM Network Route',
+                ['Registering LPA metadata...', 'Broadcasting carrier updates...', 'Synchronizing core profiles...'],
+                () => {
+                  addToast('New eSIM connection route onboarded and active!', 'success');
+                }
+              );
+            }}
+            className="flex items-center gap-1.5 shadow-md shadow-blue-500/10"
+          >
             <Plus className="h-4 w-4" />
             New Order
           </Button>
@@ -316,7 +357,13 @@ export default function AnalyticsScreen() {
         <CardContent className="p-6">
           <div className="h-[280px] w-full text-[10px] font-bold">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="analyticsRevenueGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#e2e8f0" />
                 <XAxis
                   dataKey="date"
@@ -342,15 +389,16 @@ export default function AnalyticsScreen() {
                     fontWeight: 650,
                   }}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="revenue"
                   stroke="#2563eb"
                   strokeWidth={2.5}
+                  fill="url(#analyticsRevenueGrad)"
                   dot={false}
                   activeDot={{ r: 6, stroke: '#ffffff', strokeWidth: 2 }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </CardContent>

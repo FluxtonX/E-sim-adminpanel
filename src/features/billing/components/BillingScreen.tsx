@@ -17,18 +17,28 @@ import {
 } from 'lucide-react';
 import InvoiceDetailView from './InvoiceDetailView';
 import EmailComposerModal from '@/features/customers/components/EmailComposerModal';
+import GenerateInvoiceModal from './GenerateInvoiceModal';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadCSV, downloadPDF } from '@/services/mockDownloadService';
 
 export default function BillingScreen() {
+  const [invoices, setInvoices] = useState<Invoice[]>(MOCK_INVOICES);
   const [isLoading, setIsLoading] = useState(true);
   const [viewingInvoiceId, setViewingInvoiceId] = useState<string | null>(null);
   const [shareInvoice, setShareInvoice] = useState<Invoice | null>(null);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  const selectedInvoice = MOCK_INVOICES.find(inv => inv.id === viewingInvoiceId);
+  const selectedInvoice = invoices.find(inv => inv.id === viewingInvoiceId);
+
 
   if (isLoading) {
     return (
@@ -66,7 +76,18 @@ export default function BillingScreen() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => alert('Exporting billing invoices...')}
+            onClick={() => {
+              startSimulation(
+                'Exporting Billing Invoices Data',
+                ['Extracting invoice details...', 'Formatting to CSV layout...', 'Securing output file streams...'],
+                () => {
+                  const headers = ['Invoice ID', 'Customer', 'Amount', 'Status', 'Issue Date', 'Due Date'];
+                  const rows = invoices.map(inv => [inv.id, inv.merchantName, inv.amount, inv.status, inv.issueDate, inv.dueDate]);
+                  downloadCSV('Billing_Invoices_Export', headers, rows);
+                  addToast('Billing invoices exported to CSV successfully!', 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
           >
             <Download className="h-3.5 w-3.5" />
@@ -75,7 +96,7 @@ export default function BillingScreen() {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => alert('Generating new invoice...')}
+            onClick={() => setIsGenerateModalOpen(true)}
             className="flex items-center gap-1.5 shadow-md shadow-blue-500/10"
           >
             <Plus className="h-4 w-4" />
@@ -129,7 +150,7 @@ export default function BillingScreen() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {MOCK_INVOICES.map((inv) => (
+              {invoices.map((inv) => (
                 <TableRow key={inv.id}>
                   
                   {/* Invoice Link with Icon */}
@@ -184,7 +205,30 @@ export default function BillingScreen() {
                         <SendHorizontal className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => alert(`Downloading statement PDF for invoice ${inv.id}...`)}
+                        onClick={() => {
+                          startSimulation(
+                            `Downloading PDF Invoice for ${inv.id}`,
+                            ['Opening document template...', 'Calculating billing aggregates...', 'Signing file signature...', 'Streaming download bytes...'],
+                            () => {
+                              const textContent = `
+========================================
+INVOICE STATEMENT - FLUXTONX ESIM PLATFORM
+========================================
+Invoice ID: ${inv.id}
+Recipient: ${inv.merchantName}
+Amount: $${inv.amount.toFixed(2)}
+Issue Date: ${inv.issueDate}
+Due Date: ${inv.dueDate}
+Status: ${inv.status}
+
+This invoice is digitally compiled on the FluxtonX platform.
+========================================
+                              `;
+                              downloadPDF(`Invoice_${inv.id}`, textContent);
+                              addToast(`Invoice PDF receipt for ${inv.id} downloaded successfully!`, 'success');
+                            }
+                          );
+                        }}
                         className="hover:text-slate-700 dark:hover:text-slate-350 transition-colors p-1"
                         title="Download Invoice PDF"
                       >
@@ -213,6 +257,15 @@ export default function BillingScreen() {
         />
       )}
 
+      {/* Generate Invoice Modal */}
+      <GenerateInvoiceModal
+        isOpen={isGenerateModalOpen}
+        onClose={() => setIsGenerateModalOpen(false)}
+        onGenerate={(newInvoice) => {
+          setInvoices((prev) => [newInvoice, ...prev]);
+          addToast(`Invoice "${newInvoice.id}" generated successfully!`, 'success');
+        }}
+      />
     </div>
   );
 }

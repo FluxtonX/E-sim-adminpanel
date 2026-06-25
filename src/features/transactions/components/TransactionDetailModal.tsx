@@ -4,6 +4,9 @@ import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { TransactionRecord } from '@/types';
 import { X, Receipt, Copy, Download, User, Calendar, ShieldCheck } from 'lucide-react';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadPDF } from '@/services/mockDownloadService';
 
 interface TransactionDetailModalProps {
   transaction: TransactionRecord | null;
@@ -11,10 +14,15 @@ interface TransactionDetailModalProps {
   onClose: () => void;
 }
 
+
 export default function TransactionDetailModal({ transaction, isOpen, onClose }: TransactionDetailModalProps) {
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
+
   if (!isOpen || !transaction) return null;
 
   const isCredit = transaction.type === 'Credit';
+
   
   // Custom mock reference and audit trails based on transaction ID
   const auditLogs: Record<string, { time: string; event: string }[]> = {
@@ -45,7 +53,7 @@ export default function TransactionDetailModal({ transaction, isOpen, onClose }:
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`tx_ref_${transaction.id.toLowerCase()}_98042`);
-    alert('Reference ID copied to clipboard!');
+    addToast('Reference ID copied to clipboard!', 'success');
   };
 
   return (
@@ -173,7 +181,33 @@ export default function TransactionDetailModal({ transaction, isOpen, onClose }:
           <Button
             variant="primary"
             size="sm"
-            onClick={() => alert(`Exporting ledger audit log for transaction ${transaction.id}...`)}
+            onClick={() => {
+              startSimulation(
+                `Downloading Ledger Audit PDF for ${transaction.id}`,
+                ['Fetching blockchain audit records...', 'Securing transaction credentials...', 'Structuring PDF ledger statement...', 'Streaming output file...'],
+                () => {
+                  const logContent = `
+========================================
+TRANSACTION LEDGER AUDIT LOG - FLUXTONX
+========================================
+Transaction ID: ${transaction.id}
+Merchant/Partner: ${transaction.merchant}
+Type: ${transaction.type}
+Amount: $${transaction.amount.toFixed(2)}
+Status: ${transaction.status}
+Date: ${transaction.date}
+
+AUDIT LOG RECORDS:
+${currentLogs.map((log) => `- [${log.time}] ${log.event}`).join('\n')}
+
+Reconciled and certified by United Union E-SIM audit node.
+========================================
+                  `;
+                  downloadPDF(`Ledger_Audit_${transaction.id}`, logContent);
+                  addToast(`Audit log PDF for ${transaction.id} downloaded successfully!`, 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 shadow-md shadow-blue-500/10"
           >
             <Download className="h-3.5 w-3.5" />

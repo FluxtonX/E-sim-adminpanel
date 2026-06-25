@@ -4,6 +4,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { Order } from '@/types';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadPDF } from '@/services/mockDownloadService';
+
 import {
   ArrowLeft,
   Printer,
@@ -27,13 +31,46 @@ export default function OrderDetailView({ order, onBack }: OrderDetailViewProps)
   const tax = +(order.amount * 0.08).toFixed(2);
   const subtotal = +(order.amount - tax).toFixed(2);
   
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
+  const addToast = useToastStore((s) => s.addToast);
+
   const handlePrint = () => {
-    alert(`Printing invoice for order ${order.id}...`);
+    startSimulation(
+      `Preparing Invoice Print for Order ${order.id}`,
+      ['Reading transaction ledger...', 'Generating printer-friendly layout...', 'Spooling document...'],
+      () => {
+        window.print();
+        addToast(`Order ${order.id} invoice print job spooled!`, 'success');
+      }
+    );
   };
 
   const handleDownload = () => {
-    alert(`Downloading invoice receipt PDF for order ${order.id}...`);
+    startSimulation(
+      `Generating Invoice PDF for Order ${order.id}`,
+      ['Fetching order data...', 'Cryptographically signing invoice...', 'Structuring receipt layout...', 'Streaming PDF bytes...'],
+      () => {
+        const textContent = `
+========================================
+ORDER RECEIPT STATEMENT - FLUXTONX
+========================================
+Order ID: ${order.id}
+Customer/Reseller: ${order.customerName}
+Data Plan: ${order.packageName}
+Region: ${order.region}
+Amount paid: $${order.amount.toFixed(2)}
+Date: ${order.date}
+Status: ${order.status}
+
+Thank you for choosing FluxtonX.
+========================================
+        `;
+        downloadPDF(`Order_${order.id}_Receipt`, textContent);
+        addToast(`Order invoice PDF for ${order.id} downloaded successfully!`, 'success');
+      }
+    );
   };
+
 
   // Determine timeline items based on status
   const getTimelineSteps = () => {

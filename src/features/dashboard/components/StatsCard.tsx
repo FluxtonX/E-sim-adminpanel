@@ -11,6 +11,7 @@ interface StatsCardProps {
   change: string;
   icon: React.ComponentType<{ className?: string }>;
   themeColor?: 'blue' | 'green' | 'purple' | 'orange' | 'cyan' | 'indigo';
+  disabled?: boolean;
 }
 
 export default function StatsCard({
@@ -20,6 +21,7 @@ export default function StatsCard({
   change,
   icon: Icon,
   themeColor = 'blue',
+  disabled = false,
 }: StatsCardProps) {
   
   const iconColors = {
@@ -33,16 +35,24 @@ export default function StatsCard({
 
   return (
     <motion.div
-      whileHover={{ y: -3 }}
+      whileHover={disabled ? undefined : { y: -3 }}
       transition={{ duration: 0.2 }}
+      className={disabled ? 'opacity-40 cursor-not-allowed select-none' : ''}
     >
       <Card className="h-full border-slate-100 hover:shadow-lg hover:shadow-slate-100/50 dark:hover:shadow-none">
         <CardContent className="p-5 flex flex-col justify-between h-full">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                {title}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  {title}
+                </span>
+                {disabled && (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase bg-slate-100 text-slate-500 border border-slate-200/50 dark:bg-slate-900 dark:border-slate-800">
+                    Inactive
+                  </span>
+                )}
+              </div>
               <h3 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">
                 {value}
               </h3>

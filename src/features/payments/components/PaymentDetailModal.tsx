@@ -4,6 +4,9 @@ import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { PaymentHistoryRecord } from '@/types';
 import { X, FileText, Printer, Download, Building, Landmark, CreditCard } from 'lucide-react';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadPDF } from '@/services/mockDownloadService';
 
 interface PaymentDetailModalProps {
   payment: PaymentHistoryRecord | null;
@@ -11,8 +14,13 @@ interface PaymentDetailModalProps {
   onClose: () => void;
 }
 
+
 export default function PaymentDetailModal({ payment, isOpen, onClose }: PaymentDetailModalProps) {
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
+
   if (!isOpen || !payment) return null;
+
 
   const normMethod = payment.method.toLowerCase();
   const isCard = normMethod.includes('visa') || normMethod.includes('mastercard');
@@ -121,7 +129,16 @@ export default function PaymentDetailModal({ payment, isOpen, onClose }: Payment
           <Button
             variant="outline"
             size="sm"
-            onClick={() => alert(`Printing payment receipt statement for ${payment.id}...`)}
+            onClick={() => {
+              startSimulation(
+                `Printing Statement for Payment ${payment.id}`,
+                ['Reading transaction records...', 'Compiling layout templates...', 'Sending to print buffer...'],
+                () => {
+                  window.print();
+                  addToast(`Payment statement ${payment.id} print job sent!`, 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
           >
             <Printer className="h-3.5 w-3.5" />
@@ -130,7 +147,31 @@ export default function PaymentDetailModal({ payment, isOpen, onClose }: Payment
           <Button
             variant="primary"
             size="sm"
-            onClick={() => alert(`Downloading payment receipt invoice PDF for ${payment.id}...`)}
+            onClick={() => {
+              startSimulation(
+                `Downloading Receipt PDF for ${payment.id}`,
+                ['Verifying payment provider response...', 'Creating digital stamp...', 'Structuring PDF receipt page...', 'Initiating file stream download...'],
+                () => {
+                  const textContent = `
+========================================
+PAYMENT RECEIPT STATEMENT - FLUXTONX
+========================================
+Payment ID: ${payment.id}
+Description: ${payment.description}
+Payment Method: ${payment.method}
+Amount: $${payment.amount.toFixed(2)}
+Date: ${payment.date}
+Status: ${payment.status}
+
+Transaction Reference: ${refId}
+Thank you for your transaction!
+========================================
+                  `;
+                  downloadPDF(`Payment_${payment.id}_Receipt`, textContent);
+                  addToast(`Payment receipt PDF for ${payment.id} downloaded!`, 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 shadow-md shadow-blue-500/10"
           >
             <Download className="h-3.5 w-3.5" />

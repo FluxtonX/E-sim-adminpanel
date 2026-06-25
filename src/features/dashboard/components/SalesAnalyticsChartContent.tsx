@@ -23,7 +23,7 @@ export default function SalesAnalyticsChartContent({ data }: SalesAnalyticsChart
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={data}
-          margin={{ top: 10, right: -5, left: -25, bottom: 0 }}
+          margin={{ top: 10, right: 10, left: -5, bottom: 0 }}
           barGap={4}
         >
           {/* Dashed horizontal gridlines only */}
@@ -71,8 +71,8 @@ export default function SalesAnalyticsChartContent({ data }: SalesAnalyticsChart
           <Bar 
             dataKey="orders" 
             fill="#bad7fb" 
-            radius={[2, 2, 0, 0]} 
-            barSize={16} 
+            radius={[3, 3, 0, 0]} 
+            barSize={24} 
             name="Orders" 
           />
           
@@ -80,8 +80,8 @@ export default function SalesAnalyticsChartContent({ data }: SalesAnalyticsChart
           <Bar 
             dataKey="activations" 
             fill="#aeeed1" 
-            radius={[2, 2, 0, 0]} 
-            barSize={16} 
+            radius={[3, 3, 0, 0]} 
+            barSize={24} 
             name="Activations" 
           />
           

@@ -7,6 +7,7 @@ import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Customer, eSIMItem, Order } from '@/types';
 import { MOCK_ESIM_INVENTORY_ITEMS, MOCK_ORDERS } from '@/constants/mockData';
+import { useToastStore } from '@/store/useToastStore';
 import {
   ArrowLeft,
   User,
@@ -27,6 +28,7 @@ interface CustomerDetailViewProps {
 
 export default function CustomerDetailView({ customer, onBack, getFlagComponent }: CustomerDetailViewProps) {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const addToast = useToastStore((s) => s.addToast);
 
   // Dynamic filter for associated eSIMs
   const getCustomerESIMs = (): eSIMItem[] => {
@@ -91,7 +93,7 @@ export default function CustomerDetailView({ customer, onBack, getFlagComponent 
   const customerOrders = getCustomerOrders();
 
   const handleAction = (action: string) => {
-    alert(`Action "${action}" triggered for customer ${customer.name}`);
+    addToast(`Action "${action}" triggered for customer ${customer.name}`, 'success');
   };
 
   return (

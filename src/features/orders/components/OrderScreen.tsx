@@ -6,6 +6,10 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Badge, getStatusVariant } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { MOCK_ORDERS } from '@/constants/mockData';
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadCSV } from '@/services/mockDownloadService';
+import { Order } from '@/types';
 import {
   Search,
   Loader2,
@@ -18,18 +22,21 @@ import {
 import OrderDetailView from './OrderDetailView';
 
 export default function OrderScreen() {
+  const [orders] = useState<Order[]>(MOCK_ORDERS);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Completed' | 'Active' | 'Pending' | 'Failed' | 'Expired'>('All');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [viewingOrderId, setViewingOrderId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  const filteredOrders = MOCK_ORDERS.filter((ord) => {
+  const filteredOrders = orders.filter((ord) => {
     const matchesSearch = ord.id.toLowerCase().includes(search.toLowerCase()) ||
                           ord.customerName.toLowerCase().includes(search.toLowerCase()) ||
                           ord.customerEmail.toLowerCase().includes(search.toLowerCase()) ||
@@ -38,7 +45,8 @@ export default function OrderScreen() {
     return matchesSearch && matchesStatus;
   });
 
-  const selectedOrder = MOCK_ORDERS.find((ord) => ord.id === viewingOrderId);
+  const selectedOrder = orders.find((ord) => ord.id === viewingOrderId);
+
 
   if (isLoading) {
     return (
@@ -76,7 +84,18 @@ export default function OrderScreen() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => alert('Exporting orders report...')}
+            onClick={() => {
+              startSimulation(
+                'Exporting Orders Ledger Log',
+                ['Scanning active transactions...', 'Structuring records metadata...', 'Streaming CSV file output...'],
+                () => {
+                  const headers = ['Order ID', 'Customer', 'Package', 'Amount', 'Status', 'Date'];
+                  const rows = orders.map(ord => [ord.id, ord.customerName, ord.packageName, ord.amount, ord.status, ord.date]);
+                  downloadCSV('Orders_Ledger_Export', headers, rows);
+                  addToast('Orders ledger exported successfully!', 'success');
+                }
+              );
+            }}
             className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
           >
             <Download className="h-3.5 w-3.5" />
@@ -176,7 +195,7 @@ export default function OrderScreen() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => alert('Filter customization coming soon...')}
+              onClick={() => addToast('Filter customization coming soon!', 'info')}
               className="flex items-center gap-1.5 border-slate-200 text-slate-700 bg-white"
             >
               <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />

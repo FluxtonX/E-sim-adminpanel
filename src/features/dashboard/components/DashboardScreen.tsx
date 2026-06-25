@@ -24,10 +24,16 @@ import PopularPackages from './PopularPackages';
 import { MOCK_DASHBOARD_METRICS } from '@/constants/mockData';
 import { Button } from '@/components/ui/Button';
 
+import { useToastStore } from '@/store/useToastStore';
+import { useSimulationStore } from '@/store/useSimulationStore';
+import { downloadCSV } from '@/services/mockDownloadService';
+
 export default function DashboardScreen() {
   const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const metrics = MOCK_DASHBOARD_METRICS;
+  const addToast = useToastStore((s) => s.addToast);
+  const startSimulation = useSimulationStore((s) => s.startSimulation);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -35,12 +41,33 @@ export default function DashboardScreen() {
   }, []);
 
   const handleExport = () => {
-    alert('Exporting dashboard report...');
+    startSimulation(
+      'Exporting Dashboard Summary Report',
+      ['Reading metrics data...', 'Summarizing KPIs...', 'Formulating CSV file...'],
+      () => {
+        const headers = ['Metric', 'Value', 'Change'];
+        const rows = [
+          ['Revenue', `$${metrics.totalRevenue.value}`, metrics.totalRevenue.change],
+          ['Orders', metrics.totalOrders.value, metrics.totalOrders.change],
+          ['Active eSIMs', metrics.activeESIMs.value, metrics.activeESIMs.change],
+          ['Inventory SIMs', metrics.totalInventory.value, metrics.totalInventory.change]
+        ];
+        downloadCSV('Dashboard_Summary_Report', headers, rows);
+        addToast('Dashboard report exported to CSV successfully!', 'success');
+      }
+    );
   };
 
   const handleNewOrder = () => {
-    alert('Initiating new eSIM order...');
+    startSimulation(
+      'Initiating New eSIM Order Wizard',
+      ['Checking system resource availability...', 'Opening order provisioning pipeline...', 'Pre-generating ICCID block...'],
+      () => {
+        addToast('Mock order initialization completed. Order wizard is ready.', 'success');
+      }
+    );
   };
+
 
   if (isLoading) {
     return (
@@ -125,6 +152,7 @@ export default function DashboardScreen() {
           change={metrics.merchantAccounts.change}
           icon={Users}
           themeColor="cyan"
+          disabled={true}
         />
         <StatsCard
           title="Data Usage"

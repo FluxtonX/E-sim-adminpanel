@@ -17,6 +17,9 @@ import {
 } from 'lucide-react';
 import CustomerDetailView from './CustomerDetailView';
 import EmailComposerModal from './EmailComposerModal';
+import AddCustomerModal from './AddCustomerModal';
+import { useToastStore } from '@/store/useToastStore';
+
 
 // Vector Flags components matching standard rectangular ratio
 const UKFlag = () => (
@@ -137,10 +140,13 @@ const FranceFlag = () => (
 );
 
 export default function CustomerScreen() {
+  const [customers, setCustomers] = useState<Customer[]>(MOCK_CUSTOMERS);
   const [search, setSearch] = useState('');
   const [viewingCustomerId, setViewingCustomerId] = useState<string | null>(null);
   const [composeCustomer, setComposeCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const addToast = useToastStore((s) => s.addToast);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -164,7 +170,7 @@ export default function CustomerScreen() {
     }
   };
 
-  const filteredCustomers = MOCK_CUSTOMERS.filter((customer) => {
+  const filteredCustomers = customers.filter((customer) => {
     const term = search.toLowerCase();
     return (
       customer.name.toLowerCase().includes(term) ||
@@ -173,7 +179,7 @@ export default function CustomerScreen() {
     );
   });
 
-  const selectedCustomer = MOCK_CUSTOMERS.find(c => c.id === viewingCustomerId);
+  const selectedCustomer = customers.find(c => c.id === viewingCustomerId);
 
   if (isLoading) {
     return (
@@ -212,7 +218,7 @@ export default function CustomerScreen() {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => alert('Creating new customer profile...')}
+            onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-1.5 shadow-md shadow-blue-500/10"
           >
             <Plus className="h-4 w-4" />
@@ -388,6 +394,15 @@ export default function CustomerScreen() {
         />
       )}
 
+      {/* Add Customer Modal */}
+      <AddCustomerModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={(newCustomer) => {
+          setCustomers((prev) => [newCustomer, ...prev]);
+          addToast(`Customer "${newCustomer.name}" added successfully!`, 'success');
+        }}
+      />
     </div>
   );
 }
